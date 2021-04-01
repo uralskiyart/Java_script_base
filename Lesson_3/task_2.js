@@ -25,3 +25,5 @@ function countBasketPrice(basket) {
 
     console.log(countBasketPrice(basket));
 }
+
+//p.s. Смотрю 4 урок и понял, что не правильно понял)
