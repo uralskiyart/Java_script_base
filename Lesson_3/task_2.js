@@ -6,7 +6,7 @@ function countBasketPrice(basket) {
     total = 0
 
     for (var value of basket.values()) {
-        total += value;
+        total += (value[0] * value[1]);
 
     }
     return total;
@@ -17,9 +17,9 @@ function countBasketPrice(basket) {
     let basket = new Map(); // это же тупо словарь из Питона))
     //Надеюсь я правильно понял намек)
 
-    basket.set('good1', 3400);
-    basket.set('good2', 400);
-    basket.set('good3', 200);
+    basket.set('good1', [3400, 1]);
+    basket.set('good2', [400, 2]);
+    basket.set('good3', [200, 3]);
 
 
 
