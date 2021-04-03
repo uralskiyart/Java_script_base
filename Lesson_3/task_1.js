@@ -9,7 +9,7 @@ function primeCheck(num) {
 }
 
 function primesFinder(last_num) {
-    let primes_arr = [];
+    let primes_arr = [2];
     current = 2;
 
     while (current <= last_num) {
