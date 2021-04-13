@@ -1,0 +1,40 @@
+<!-- // 1. Создать функцию, генерирующую шахматную доску. При этом можно использовать любые html-теги по своему желанию. Доска должна быть разлинована соответствующим образом, т.е. чередовать черные и белые ячейки. Строки должны нумероваться числами от 1 до 8, столбцы – латинскими буквами A, B, C, D, E, F, G, H. -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess</title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        tr {
+            width: 60px;
+            height: 60px;
+        }
+
+        td {
+            border: 1px solid #888888;
+            width: 60px;
+            height: 60px;
+            background-color: #FFFACD;
+            text-align: center;
+            font-style: oblique;
+            font-family: 'Luminari, fantasy';
+            font-size: 2em;
+        }
+    </style>
+</head>
+
+<body>
+    <table id="board"></table>
+    <script src="chess.js"></script>
+
+</body>
+
+</html>
