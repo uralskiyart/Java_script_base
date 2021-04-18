@@ -4,6 +4,7 @@ const settings = {
     colsCount: 21,
     speed: 2,
     winFoodCount: 50,
+    obstructionInterval: 3
 };
 
 const config = {
@@ -86,7 +87,7 @@ const map = {
 
     },
 
-    render(snakePointsArray, foodPoint) {
+    render(snakePointsArray, foodPoint, obstructionPoint) {
         for (const cell of this.usedCells) {
             cell.className = 'cell';
         }
@@ -102,6 +103,13 @@ const map = {
         const foodCell = this.cells[`x${foodPoint.x}_y${foodPoint.y}`];
         foodCell.classList.add('food');
         this.usedCells.push(foodCell);
+
+        if (obstructionPoint.x !== null) {
+            const obstructionCell = this.cells[`x${obstructionPoint.x}_y${obstructionPoint.y}`];
+            obstructionCell.classList.add('obstruction');
+            this.usedCells.push(obstructionCell);
+        }
+
     },
 };
 
@@ -183,6 +191,32 @@ const food = {
     },
 };
 
+const obstruction = {
+    x: null,
+    y: null,
+    count: 0,
+
+    getCoordinates() {
+        return {
+            x: this.x,
+            y: this.y,
+        };
+    },
+
+    intervalCount() {
+        this.count++;
+    },
+
+    setCoordinates(point) {
+        this.x = point.x;
+        this.y = point.y;
+    },
+
+    isOnPoint(point) {
+        return this.x === point.x && this.y === point.y;
+    },
+};
+
 const status = {
     condition: null,
 
@@ -211,8 +245,13 @@ const score = {
     value: null,
     scoreBlock: null,
 
+    init() {
+        this.scoreBlock = document.getElementById("score-value");
+        this.drop();
+    },
+
     render() {
-        this.scoreBlock.textContent = this.count;
+        this.scoreBlock.textContent = this.value;
     },
 
     addition() {
@@ -231,8 +270,10 @@ const game = {
     map,
     snake,
     food,
+    obstruction,
     status,
     score,
+    obstructionIntervalCount: 0,
     tickInterval: null,
 
     init(userSettings = {}) {
@@ -256,7 +297,7 @@ const game = {
         this.stop();
         this.score.drop();
         this.snake.init(this.getStartSnakeBody(), 'up');
-        this.food.setCoordinates(this.getRandomFreeCoordinates());
+        this.food.setCoordinates(this.getFoodRandomFreeCoordinates());
         this.render();
     },
 
@@ -269,14 +310,27 @@ const game = {
         ];
     },
 
-    getRandomFreeCoordinates() {
-        const exclude = [this.food.getCoordinates(), ...this.snake.getBody()];
-
+    getFoodRandomFreeCoordinates() {
+        const exclude = [this.food.getCoordinates(), this.obstruction.getCoordinates(), ...this.snake.getBody()];
         while (true) {
             const rndPoint = {
                 x: Math.floor(Math.random() * this.config.getColsCount()),
                 y: Math.floor(Math.random() * this.config.getRowsCount()),
             };
+
+            if (!exclude.some(exPoint => rndPoint.x === exPoint.x && rndPoint.y === exPoint.y)) {
+                return rndPoint;
+            }
+        }
+    },
+
+    getObstructionRandomFreeCoordinates() {
+        const exclude = [this.food.getCoordinates(), this.obstruction.getCoordinates(), ...this.snake.getBody()];
+        while (true) {
+            const rndPoint = [{
+                x: Math.floor(Math.random() * this.config.getColsCount()),
+                y: Math.floor(Math.random() * this.config.getRowsCount()),
+            }];
 
             if (!exclude.some(exPoint => rndPoint.x === exPoint.x && rndPoint.y === exPoint.y)) {
                 return rndPoint;
@@ -318,8 +372,14 @@ const game = {
 
         if (this.food.isOnPoint(this.snake.getNextStepHeadPoint())) {
             this.snake.growUp();
-            this.food.setCoordinates(this.getRandomFreeCoordinates());
+            this.food.setCoordinates(this.getFoodRandomFreeCoordinates());
+            this.score.addition();
 
+            if (this.obstruction.count === 3) {
+                this.obstruction.setCoordinates(this.getFoodRandomFreeCoordinates());
+                this.obstruction.count = 0;
+            }
+            this.obstruction.intervalCount();
             if (this.isGameWon()) this.finish();
         }
 
@@ -398,8 +458,7 @@ const game = {
     },
 
     render() {
-        this.map.render(this.snake.getBody(), this.food.getCoordinates());
-    }
+        this.map.render(this.snake.getBody(), this.food.getCoordinates(), this.obstruction.getCoordinates());
+    },
 };
-
 game.init({ speed: 5 });
