@@ -2,7 +2,7 @@
 const settings = {
     rowsCount: 21,
     colsCount: 21,
-    speed: 2,
+    speed: 20,
     winFoodCount: 50,
     obstructionInterval: 3
 };
@@ -118,10 +118,12 @@ const snake = {
     direction: null,
     lastStepDirection: null,
 
-    init(startBody, direction) {
+    init(startBody, direction, maxX, maxY) {
         this.body = startBody;
         this.direction = direction;
         this.lastStepDirection = direction;
+        this.maxX = maxX;
+        this.maxY = maxY;
     },
 
     getBody() {
@@ -155,13 +157,13 @@ const snake = {
 
         switch (this.direction) {
             case 'up':
-                return { x: firstPoint.x, y: firstPoint.y - 1 };
+                return { x: firstPoint.x, y: firstPoint.y !== 0 ? firstPoint.y - 1 : this.maxY };
             case 'right':
-                return { x: firstPoint.x + 1, y: firstPoint.y };
+                return { x: firstPoint.x !== this.maxX ? firstPoint.x + 1 : 0, y: firstPoint.y };
             case 'down':
-                return { x: firstPoint.x, y: firstPoint.y + 1 };
+                return { x: firstPoint.x, y: firstPoint.y !== this.maxY ? firstPoint.y + 1 : 0 };
             case 'left':
-                return { x: firstPoint.x - 1, y: firstPoint.y };
+                return { x: firstPoint.x !== 0 ? firstPoint.x - 1 : this.maxX, y: firstPoint.y };
         }
     },
 
@@ -296,7 +298,7 @@ const game = {
     reset() {
         this.stop();
         this.score.drop();
-        this.snake.init(this.getStartSnakeBody(), 'up');
+        this.snake.init(this.getStartSnakeBody(), 'up', this.config.getColsCount() - 1, this.config.getRowsCount() - 1);
         this.food.setCoordinates(this.getFoodRandomFreeCoordinates());
         this.render();
     },
@@ -326,6 +328,7 @@ const game = {
 
     getObstructionRandomFreeCoordinates() {
         const exclude = [this.food.getCoordinates(), this.obstruction.getCoordinates(), ...this.snake.getBody()];
+
         while (true) {
             const rndPoint = [{
                 x: Math.floor(Math.random() * this.config.getColsCount()),
@@ -389,12 +392,8 @@ const game = {
 
     canMakeStep() {
         const nextHeadPoint = this.snake.getNextStepHeadPoint();
-
         return !this.snake.isOnPoint(nextHeadPoint) &&
-            nextHeadPoint.x < this.config.getColsCount() &&
-            nextHeadPoint.y < this.config.getRowsCount() &&
-            nextHeadPoint.x >= 0 &&
-            nextHeadPoint.y >= 0;
+            !this.obstruction.isOnPoint(nextHeadPoint);
     },
 
     playClickHandler() {
